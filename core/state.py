@@ -21,7 +21,5 @@ def init_state() -> None:
         st.session_state["chat_history"]: list[dict] = []
     if "last_chart" not in st.session_state:
         st.session_state["last_chart"] = None
-    if "api_key" not in st.session_state:
-        st.session_state["api_key"]: str = ""
     if "active_file_ids" not in st.session_state:
         st.session_state["active_file_ids"]: list[str] = []

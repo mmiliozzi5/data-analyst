@@ -1,29 +1,12 @@
-import os
 import streamlit as st
-from dotenv import load_dotenv
 
 from utils.formatting import truncate
 
-load_dotenv()
-
 
 def render_sidebar() -> None:
-    """Render the sidebar: API key input and dataset management."""
+    """Render the sidebar: dataset management."""
     with st.sidebar:
         st.title("Data Analyst")
-
-        # --- API Key ---
-        st.subheader("Configuration")
-        default_key = st.session_state.get("api_key") or os.getenv("ANTHROPIC_API_KEY", "")
-        api_key = st.text_input(
-            "Anthropic API Key",
-            value=default_key,
-            type="password",
-            help="Your key is stored only in this browser session.",
-        )
-        st.session_state["api_key"] = api_key
-
-        st.divider()
 
         # --- Dataset list ---
         datasets: dict = st.session_state.get("datasets", {})

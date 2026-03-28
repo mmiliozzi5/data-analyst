@@ -1,9 +1,13 @@
-from typing import Generator, Iterator
+import os
+from typing import Generator
 
 import anthropic
+from dotenv import load_dotenv
 
 from core.state import DatasetRecord
 from utils.df_summarizer import summarize_df
+
+load_dotenv()
 
 MODEL = "claude-sonnet-4-6"
 
@@ -32,7 +36,6 @@ def chat_stream(
     user_message: str,
     history: list[dict],
     datasets: dict[str, DatasetRecord],
-    api_key: str,
 ) -> Generator[str, None, None]:
     """
     Stream a Claude response given the user message, chat history, and datasets.
@@ -40,6 +43,9 @@ def chat_stream(
     Yields text chunks as they arrive. Caller should accumulate them
     and append the full response to history.
     """
+    api_key = os.getenv("ANTHROPIC_API_KEY")
+    if not api_key:
+        raise ValueError("ANTHROPIC_API_KEY is not set. Add it to your .env file.")
     client = anthropic.Anthropic(api_key=api_key)
 
     messages = _build_messages(history, user_message)

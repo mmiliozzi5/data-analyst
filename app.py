@@ -19,10 +19,16 @@ render_sidebar()
 
 st.header("📊 Data Analyst")
 
-render_uploader()
+tab_upload, tab_tables, tab_chat = st.tabs(["Upload", "Tables", "Chat"])
 
-if st.session_state.get("datasets"):
-    render_table_viewer()
-    st.divider()
+with tab_upload:
+    render_uploader()
 
-render_chat()
+with tab_tables:
+    if st.session_state.get("datasets"):
+        render_table_viewer()
+    else:
+        st.info("Upload a dataset in the Upload tab to view it here.")
+
+with tab_chat:
+    render_chat()
