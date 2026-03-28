@@ -13,7 +13,7 @@ def render_sidebar() -> None:
         st.subheader(f"Datasets ({len(datasets)})")
 
         if not datasets:
-            st.caption("No datasets loaded yet. Upload a file above.")
+            st.caption("No datasets loaded yet. Upload a file in the Upload tab.")
         else:
             for file_id, record in list(datasets.items()):
                 col1, col2 = st.columns([4, 1])
