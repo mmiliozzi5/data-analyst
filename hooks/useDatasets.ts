@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { upload } from "@vercel/blob/client";
 import type { DatasetMetadata } from "@/lib/types";
 
 export function useDatasets(sessionId: string) {
@@ -24,16 +25,32 @@ export function useDatasets(sessionId: string) {
   const uploadDataset = useCallback(
     async (file: File, description: string): Promise<DatasetMetadata | null> => {
       if (!sessionId) return null;
-      const form = new FormData();
-      form.append("file", file);
-      form.append("description", description);
-      form.append("sessionId", sessionId);
 
-      const res = await fetch("/api/datasets/upload", { method: "POST", body: form });
+      // Step 1: upload file directly from browser to Vercel Blob (bypasses serverless size limit)
+      const blob = await upload(file.name, file, {
+        access: "public",
+        handleUploadUrl: "/api/datasets/upload-token",
+      });
+
+      // Step 2: parse + save dataset JSON via API route
+      const res = await fetch("/api/datasets/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          rawBlobUrl: blob.url,
+          filename: file.name,
+          description,
+          sessionId,
+        }),
+      });
+
       if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error ?? "Upload failed");
+        const text = await res.text();
+        let message = "Upload failed";
+        try { message = JSON.parse(text).error ?? message; } catch { message = text || message; }
+        throw new Error(message);
       }
+
       const metadata: DatasetMetadata = await res.json();
       setDatasets((prev) => [...prev, metadata]);
       return metadata;

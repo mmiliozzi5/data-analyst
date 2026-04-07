@@ -4,23 +4,24 @@ import { uploadDatasetBlob } from "@/lib/blob";
 
 export const runtime = "nodejs";
 
+// Receives: { rawBlobUrl, filename, description, sessionId }
+// The file was already uploaded directly to Vercel Blob by the client.
+// This route fetches it, parses it, and saves the dataset JSON blob.
 export async function POST(req: NextRequest) {
   try {
-    const formData = await req.formData();
-    const file = formData.get("file") as File | null;
-    const description = (formData.get("description") as string) ?? "";
-    const sessionId = formData.get("sessionId") as string | null;
+    const { rawBlobUrl, filename, description, sessionId } = await req.json();
 
-    if (!file) {
-      return NextResponse.json({ error: "No file provided" }, { status: 400 });
-    }
-    if (!sessionId) {
-      return NextResponse.json({ error: "No sessionId provided" }, { status: 400 });
+    if (!rawBlobUrl || !filename || !sessionId) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    const buffer = await file.arrayBuffer();
-    const dataset = await parseFile(buffer, file.name, description, sessionId);
+    const fileRes = await fetch(rawBlobUrl);
+    if (!fileRes.ok) {
+      return NextResponse.json({ error: "Failed to fetch uploaded file" }, { status: 500 });
+    }
+    const buffer = await fileRes.arrayBuffer();
 
+    const dataset = await parseFile(buffer, filename, description ?? "", sessionId);
     const blobUrl = await uploadDatasetBlob(sessionId, dataset);
     dataset.metadata.blobUrl = blobUrl;
 
