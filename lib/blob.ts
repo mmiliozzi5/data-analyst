@@ -1,11 +1,14 @@
 import { list, del, put } from "@vercel/blob";
 import type { DatasetBlob, DatasetMetadata } from "@/lib/types";
 
+// Dataset JSONs live under "datasets/{sessionId}/"
+// Raw uploaded files live under "raw/{sessionId}/" — never listed by this module
+
 export async function uploadDatasetBlob(
   sessionId: string,
   dataset: DatasetBlob
 ): Promise<string> {
-  const pathname = `${sessionId}/${dataset.metadata.id}.json`;
+  const pathname = `datasets/${sessionId}/${dataset.metadata.id}.json`;
   const json = JSON.stringify(dataset);
   const blob = await put(pathname, json, {
     access: "public",
@@ -15,14 +18,13 @@ export async function uploadDatasetBlob(
 }
 
 export async function listDatasetBlobs(sessionId: string): Promise<DatasetMetadata[]> {
-  const { blobs } = await list({ prefix: `${sessionId}/` });
+  const { blobs } = await list({ prefix: `datasets/${sessionId}/` });
 
   const metadataList = await Promise.all(
     blobs.map(async (blob) => {
       try {
         const res = await fetch(blob.url);
         const data: DatasetBlob = await res.json();
-        // Always use the authoritative URL from the blob listing
         data.metadata.blobUrl = blob.url;
         return data.metadata;
       } catch {
@@ -45,7 +47,7 @@ export async function deleteDatasetBlob(blobUrl: string): Promise<void> {
 }
 
 export async function getAllDatasetsForSession(sessionId: string): Promise<DatasetBlob[]> {
-  const { blobs } = await list({ prefix: `${sessionId}/` });
+  const { blobs } = await list({ prefix: `datasets/${sessionId}/` });
 
   const datasets = await Promise.all(
     blobs.map(async (blob) => {

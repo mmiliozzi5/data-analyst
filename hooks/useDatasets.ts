@@ -29,7 +29,7 @@ export function useDatasets(sessionId: string) {
       // Step 1: upload file directly from browser to Vercel Blob (bypasses serverless size limit)
       const blob = await upload(file.name, file, {
         access: "public",
-        handleUploadUrl: "/api/datasets/upload-token",
+        handleUploadUrl: `/api/datasets/upload-token?sessionId=${sessionId}`,
       });
 
       // Step 2: parse + save dataset JSON via API route
