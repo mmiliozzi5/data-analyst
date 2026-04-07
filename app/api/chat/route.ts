@@ -3,7 +3,6 @@ import { streamText, type CoreMessage } from "ai";
 import { NextRequest } from "next/server";
 import { getAllDatasetsForSession } from "@/lib/blob";
 import { buildSystemPrompt } from "@/lib/summarizer";
-import { makeChartTool } from "@/lib/chart-tool";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -37,10 +36,6 @@ export async function POST(req: NextRequest) {
       model: anthropic("claude-sonnet-4-6"),
       system: systemPrompt,
       messages: trimmedMessages,
-      maxSteps: 5,
-      tools: {
-        generate_chart: makeChartTool(sessionId),
-      },
     });
 
     return result.toDataStreamResponse();

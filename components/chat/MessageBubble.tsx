@@ -1,8 +1,6 @@
 "use client";
 
 import type { Message } from "@ai-sdk/react";
-import { ChartBlock } from "./ChartBlock";
-import type { PlotlySpec } from "@/lib/types";
 
 interface MessageBubbleProps {
   message: Message;
@@ -28,28 +26,6 @@ export function MessageBubble({ message }: MessageBubbleProps) {
               </p>
             );
           }
-
-          if (part.type === "tool-invocation") {
-            if (part.toolInvocation.state === "result") {
-              const result = part.toolInvocation.result as PlotlySpec | { error: string };
-              if ("error" in result) {
-                return (
-                  <p key={idx} className="text-red-400 text-xs">
-                    Chart error: {result.error}
-                  </p>
-                );
-              }
-              return <ChartBlock key={idx} spec={result} />;
-            }
-            if (part.toolInvocation.state === "call") {
-              return (
-                <p key={idx} className="text-gray-400 text-xs italic">
-                  Generating chart…
-                </p>
-              );
-            }
-          }
-
           return null;
         })}
       </div>
