@@ -73,7 +73,12 @@ export function AppShell() {
 
         {/* Content */}
         <div className="flex-1 min-h-0 overflow-hidden">
-          {tab === "chat" && sessionId && <ChatPanel sessionId={sessionId} />}
+          {/* Always keep ChatPanel mounted so conversation is preserved when switching tabs */}
+          {sessionId && (
+            <div className={`h-full ${tab !== "chat" ? "hidden" : ""}`}>
+              <ChatPanel sessionId={sessionId} />
+            </div>
+          )}
 
           {tab === "datasets" && (
             selectedDataset ? (

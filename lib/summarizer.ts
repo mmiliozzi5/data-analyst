@@ -59,7 +59,6 @@ export function buildSystemPrompt(datasets: DatasetBlob[]): string {
 
 ${summaries}
 
-You can answer questions about this data, perform analysis, and generate charts using the generate_chart tool.
-When generating charts, use the exact column names and dataset filenames shown above.
+You can answer questions about this data and perform analysis. Always answer data questions directly using the sample rows and statistics provided above — never refuse or deflect when the data is available to you.
 Be concise and focus on insights that are relevant to the user's question.`;
 }
