@@ -1,8 +1,21 @@
+# env
 .env
+.env.local
+.env*.local
+
+# Next.js
+.next/
+out/
+node_modules/
+tsconfig.tsbuildinfo
+
+# Python (legacy)
 __pycache__/
 *.py[cod]
 .streamlit/secrets.toml
 .venv/
 venv/
 *.egg-info/
+
+# OS
 .DS_Store
