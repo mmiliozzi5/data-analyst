@@ -10,7 +10,7 @@ interface ChatPanelProps {
 }
 
 export function ChatPanel({ sessionId }: ChatPanelProps) {
-  const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
+  const { messages, input, handleInputChange, handleSubmit, isLoading, error } = useChat({
     api: "/api/chat",
     body: { sessionId },
   });
@@ -19,7 +19,16 @@ export function ChatPanel({ sessionId }: ChatPanelProps) {
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, isLoading]);
+
+  // Don't render until sessionId is ready
+  if (!sessionId) {
+    return (
+      <div className="flex items-center justify-center h-full text-gray-500 text-sm">
+        Loading…
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full">
@@ -31,6 +40,27 @@ export function ChatPanel({ sessionId }: ChatPanelProps) {
         ) : (
           messages.map((msg) => <MessageBubble key={msg.id} message={msg} />)
         )}
+
+        {/* Thinking indicator — only when no assistant text is streaming yet */}
+        {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
+          <div className="flex justify-start mb-3">
+            <div className="bg-gray-800 rounded-lg px-4 py-3 flex items-center gap-1.5">
+              <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:0ms]" />
+              <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:150ms]" />
+              <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:300ms]" />
+            </div>
+          </div>
+        )}
+
+        {/* Error */}
+        {error && (
+          <div className="flex justify-start mb-3">
+            <div className="bg-red-900/40 border border-red-700 rounded-lg px-4 py-2 text-red-300 text-sm">
+              {error.message}
+            </div>
+          </div>
+        )}
+
         <div ref={bottomRef} />
       </div>
 
