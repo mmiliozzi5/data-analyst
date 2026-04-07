@@ -14,16 +14,21 @@ export function summarizeDataset(dataset: DatasetBlob): string {
     .join(", ");
   lines.push(`Columns: ${colDescriptions}`);
 
-  // Sample rows (first 3)
+  // Full data rows (capped at 500 to stay within context limits)
+  const ROW_CAP = 500;
   if (rows.length > 0) {
-    const sampleRows = rows.slice(0, 3);
+    const displayRows = rows.slice(0, ROW_CAP);
     const colNames = metadata.columns.map((c) => c.name);
     const header = colNames.join(" | ");
     const separator = colNames.map((c) => "-".repeat(c.length)).join("-|-");
-    const dataLines = sampleRows.map((row) =>
+    const dataLines = displayRows.map((row) =>
       colNames.map((c) => String(row[c] ?? "")).join(" | ")
     );
-    lines.push(`Sample (${sampleRows.length} rows):`);
+    const label =
+      rows.length > ROW_CAP
+        ? `Data (first ${ROW_CAP} of ${rows.length} rows):`
+        : `Data (${rows.length} rows):`;
+    lines.push(label);
     lines.push(`  ${header}`);
     lines.push(`  ${separator}`);
     for (const dl of dataLines) {
