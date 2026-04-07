@@ -13,9 +13,9 @@ export async function GET(req: NextRequest) {
     const datasets = await listDatasetBlobs(sessionId);
     return NextResponse.json(datasets);
   } catch (err) {
-    console.error("GET /api/datasets error:", err);
-    const message = err instanceof Error ? err.message : "Unknown error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("GET /api/datasets error:", err instanceof Error ? err.message : err);
+    // Return empty array so the UI still loads
+    return NextResponse.json([]);
   }
 }
 
