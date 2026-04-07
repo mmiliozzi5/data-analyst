@@ -13,6 +13,10 @@ export function ChatPanel({ sessionId }: ChatPanelProps) {
   const { messages, input, handleInputChange, handleSubmit, isLoading, error } = useChat({
     api: "/api/chat",
     body: { sessionId },
+    experimental_prepareRequestBody: ({ messages, requestBody }) => {
+      // Keep only last 20 messages to avoid hitting Vercel's 4.5MB payload limit
+      return { ...requestBody, messages: messages.slice(-20), sessionId };
+    },
   });
 
   const bottomRef = useRef<HTMLDivElement>(null);

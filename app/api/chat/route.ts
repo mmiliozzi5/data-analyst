@@ -1,5 +1,5 @@
 import { anthropic } from "@ai-sdk/anthropic";
-import { streamText } from "ai";
+import { streamText, type CoreMessage } from "ai";
 import { NextRequest } from "next/server";
 import { getAllDatasetsForSession } from "@/lib/blob";
 import { buildSystemPrompt } from "@/lib/summarizer";
@@ -7,6 +7,8 @@ import { makeChartTool } from "@/lib/chart-tool";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
+
+const MAX_MESSAGES = 20;
 
 export async function POST(req: NextRequest) {
   try {
@@ -25,15 +27,16 @@ export async function POST(req: NextRequest) {
       datasets = await getAllDatasetsForSession(sessionId);
     } catch (blobErr) {
       console.error("Blob list error:", blobErr);
-      // Continue without datasets rather than failing completely
     }
 
     const systemPrompt = buildSystemPrompt(datasets);
+    // Safety net: truncate server-side too in case client sends more
+    const trimmedMessages = (messages as CoreMessage[]).slice(-MAX_MESSAGES);
 
     const result = streamText({
       model: anthropic("claude-sonnet-4-6"),
       system: systemPrompt,
-      messages,
+      messages: trimmedMessages,
       maxSteps: 5,
       tools: {
         generate_chart: makeChartTool(sessionId),
